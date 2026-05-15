@@ -33,6 +33,7 @@ engine/.env
 engine/.env.*
 dashboard/.env
 dashboard/.env.*
+.cache/
 
 # Evaluation outputs
 results/

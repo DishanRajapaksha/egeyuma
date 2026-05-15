@@ -32,6 +32,14 @@ uv run egeyuma run \
   --output ../results/sample-run.json
 ```
 
+You can also use the gated SinhalaMMLU dataset from Hugging Face by setting an
+`HF_TOKEN` with access to `naist-nlp/SinhalaMMLU`:
+
+```bash
+export HF_TOKEN=...
+uv run egeyuma validate sinhalammlu --dataset-limit 100
+```
+
 Run through Inspect AI:
 
 ```bash
@@ -44,6 +52,21 @@ uv run egeyuma run \
 ```
 
 For real models, the Inspect engine uses Inspect AI's native model-provider abstraction via its `generate()` solver. The `constant/A` ... `constant/E` models are the only exception: they use a tiny custom solver so smoke tests can run offline.
+
+To evaluate SinhalaMMLU directly from Hugging Face, use the `sinhalammlu` dataset alias.
+The first run downloads and converts the dataset into `.cache/egeyuma/sinhalammlu.jsonl`:
+
+```bash
+export HF_TOKEN=...
+uv run egeyuma run \
+  --dataset sinhalammlu \
+  --dataset-limit 100 \
+  --model constant/B \
+  --prompt mcq_si_subject_v1 \
+  --output ../results/sinhalammlu-run.json
+```
+
+Use `--refresh-dataset` to rebuild the local cache from Hugging Face.
 
 Generate a report:
 

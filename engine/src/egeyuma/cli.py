@@ -7,6 +7,7 @@ import typer
 from rich.console import Console
 
 from egeyuma.datasets.jsonl import DatasetValidationError, load_mcq_jsonl
+from egeyuma.datasets.sinhalammlu import resolve_dataset_path
 from egeyuma.reporting import load_result, render_text_report
 from egeyuma.runner import run_mcq_evaluation
 
@@ -15,21 +16,39 @@ console = Console()
 
 
 @app.command()
-def validate(dataset: Path) -> None:
+def validate(
+    dataset: Annotated[str, typer.Argument(help="Path or dataset alias such as sinhalammlu.")],
+    refresh_dataset: Annotated[
+        bool,
+        typer.Option(help="Refresh cached remote datasets before validating."),
+    ] = False,
+    dataset_limit: Annotated[
+        int | None,
+        typer.Option(help="Maximum remote dataset records to materialize."),
+    ] = None,
+) -> None:
     """Validate a JSONL dataset against the canonical MCQ schema."""
 
     try:
-        items = load_mcq_jsonl(dataset)
+        dataset_path = resolve_dataset_path(
+            dataset,
+            refresh=refresh_dataset,
+            limit=dataset_limit,
+        )
+        items = load_mcq_jsonl(dataset_path)
     except DatasetValidationError as exc:
         console.print(f"[red]Invalid dataset:[/red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    console.print(f"[green]Valid dataset[/green]: {dataset} ({len(items)} items)")
+    console.print(f"[green]Valid dataset[/green]: {dataset_path} ({len(items)} items)")
 
 
 @app.command()
 def run(
-    dataset: Annotated[Path, typer.Option(help="Path to canonical MCQ JSONL dataset.")],
+    dataset: Annotated[
+        str,
+        typer.Option(help="Path to canonical MCQ JSONL dataset, or sinhalammlu."),
+    ],
     output: Annotated[Path, typer.Option(help="Output result JSON path.")],
     engine: Annotated[
         Literal["native", "inspect"],
@@ -66,11 +85,24 @@ def run(
         int,
         typer.Option(help="Maximum generated tokens for API-backed models."),
     ] = 16,
+    refresh_dataset: Annotated[
+        bool,
+        typer.Option(help="Refresh cached remote datasets before running."),
+    ] = False,
+    dataset_limit: Annotated[
+        int | None,
+        typer.Option(help="Maximum remote dataset records to materialize."),
+    ] = None,
 ) -> None:
     """Run an MCQ evaluation."""
 
+    dataset_path = resolve_dataset_path(
+        dataset,
+        refresh=refresh_dataset,
+        limit=dataset_limit,
+    )
     result = run_mcq_evaluation(
-        dataset_path=dataset,
+        dataset_path=dataset_path,
         model_name=model,
         prompt_name=prompt,
         output_path=output,

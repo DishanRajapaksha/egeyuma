@@ -68,8 +68,22 @@ def test_raw_sinhalammlu_id_changes_when_source_changes() -> None:
 def test_raw_sinhalammlu_rejects_answer_outside_choices() -> None:
     raw = {**RAW_SINHALAMMLU_ITEM, "answer": 5}
 
-    with pytest.raises(ValidationError, match="answer points outside choices"):
+    with pytest.raises(ValidationError, match="answer does not match any choice"):
         SinhalaMMLURawItem.model_validate(raw)
+
+
+def test_sinhalammlu_numeric_answer_can_be_choice_value() -> None:
+    item = SinhalaMMLURawItem(
+        q_no=1,
+        subject="Civics",
+        category="social_science",
+        question="ප්‍රශ්නය?",
+        choices=["04", "15", "24", "360"],
+        answer=24,
+    ).to_mcq_item()
+
+    assert item.answer_index == 2
+    assert item.answer_label == "C"
 
 
 def test_canonical_mcq_rejects_mismatched_answer_label() -> None:

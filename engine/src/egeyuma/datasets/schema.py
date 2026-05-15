@@ -68,17 +68,16 @@ class SinhalaMMLURawItem(BaseModel):
     category: str
     question: str = Field(min_length=1)
     choices: list[str] = Field(min_length=2, max_length=5)
-    answer: int = Field(ge=1, le=5)
+    answer: int | str
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_answer_range(self) -> SinhalaMMLURawItem:
-        if self.answer > len(self.choices):
-            raise ValueError("answer points outside choices")
+        self._answer_index()
         return self
 
     def to_mcq_item(self) -> MCQItem:
-        answer_index = self.answer - 1
+        answer_index = self._answer_index()
         source = self.metadata.get("source")
         difficulty = self.metadata.get("difficulty")
         grade = self.metadata.get("grade")
@@ -119,6 +118,17 @@ class SinhalaMMLURawItem(BaseModel):
                 "raw_category": self.category,
             },
         )
+
+    def _answer_index(self) -> int:
+        if isinstance(self.answer, int) and 1 <= self.answer <= len(self.choices):
+            return self.answer - 1
+
+        answer_text = str(self.answer).strip()
+        for index, choice in enumerate(self.choices):
+            if str(choice).strip() == answer_text:
+                return index
+
+        raise ValueError("answer does not match any choice")
 
 
 def coerce_mcq_item(raw: dict[str, Any]) -> MCQItem:
