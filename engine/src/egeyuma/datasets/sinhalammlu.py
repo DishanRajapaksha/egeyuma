@@ -10,6 +10,7 @@ from urllib.request import Request, urlopen
 
 from egeyuma.datasets.jsonl import DatasetValidationError
 from egeyuma.datasets.schema import coerce_mcq_item
+from egeyuma.logging import LogFn, null_log
 
 SINHALAMMLU_REPO = "naist-nlp/SinhalaMMLU"
 SINHALAMMLU_REVISION = "main"
@@ -32,6 +33,7 @@ def resolve_dataset_path(
     refresh: bool = False,
     limit: int | None = None,
     cache_path: Path = DEFAULT_CACHE_PATH,
+    log: LogFn = null_log,
 ) -> Path:
     path = Path(dataset)
     if path.exists():
@@ -41,6 +43,7 @@ def resolve_dataset_path(
         return path
 
     if cache_path.exists() and not refresh:
+        log(f"Using cached SinhalaMMLU dataset: {cache_path}")
         return cache_path
 
     token = _hf_token()
@@ -50,7 +53,8 @@ def resolve_dataset_path(
             "or pass a local converted JSONL path."
         )
 
-    materialize_sinhalammlu_dataset(cache_path, token=token, limit=limit)
+    log(f"Downloading SinhalaMMLU from Hugging Face into {cache_path}")
+    materialize_sinhalammlu_dataset(cache_path, token=token, limit=limit, log=log)
     return cache_path
 
 
@@ -83,9 +87,11 @@ def materialize_sinhalammlu_dataset(
     token: str,
     limit: int | None = None,
     fetch_json: FetchJson | None = None,
+    log: LogFn = null_log,
 ) -> int:
     fetch_json = fetch_json or _fetch_json
     records_written = 0
+    log(f"Fetching SinhalaMMLU file list from {SINHALAMMLU_REPO}@{SINHALAMMLU_REVISION}")
     tree = fetch_json(_tree_url(), token)
     json_paths = [
         entry["path"]
@@ -99,16 +105,21 @@ def materialize_sinhalammlu_dataset(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as handle:
-        for dataset_path in sorted(json_paths):
+        for file_index, dataset_path in enumerate(sorted(json_paths), start=1):
+            log(f"Fetching SinhalaMMLU file {file_index}/{len(json_paths)}: {dataset_path}")
             payload = fetch_json(_raw_file_url(dataset_path), token)
             for raw_record in _iter_records(payload):
                 raw_record = _with_source_file(raw_record, dataset_path)
                 item = coerce_mcq_item(raw_record)
                 handle.write(item.model_dump_json() + "\n")
                 records_written += 1
+                if records_written == 1 or records_written % 100 == 0:
+                    log(f"Materialized {records_written} SinhalaMMLU records")
                 if limit is not None and records_written >= limit:
+                    log(f"Reached dataset limit: {limit}")
                     return records_written
 
+    log(f"Materialized {records_written} SinhalaMMLU records")
     return records_written
 
 

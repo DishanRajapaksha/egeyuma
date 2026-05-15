@@ -14,6 +14,7 @@ from inspect_ai.solver import Generate, Solver, TaskState, generate, solver
 
 from egeyuma.datasets.jsonl import load_mcq_jsonl, write_json
 from egeyuma.datasets.schema import MCQItem
+from egeyuma.logging import LogFn, null_log
 from egeyuma.models import create_model_adapter
 from egeyuma.prompts import render_mcq_prompt
 from egeyuma.runner import build_result_item, build_result_payload
@@ -221,10 +222,14 @@ def run_inspect_mcq_evaluation(
     api_key: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 16,
+    log: LogFn = null_log,
 ) -> dict[str, Any]:
+    log(f"Loading dataset: {dataset_path}")
     dataset = load_mcq_jsonl(dataset_path)
+    log(f"Loaded {len(dataset)} MCQ items")
     samples = [_sample_from_item(item, prompt_name) for item in dataset]
     inspect_log_dir = output_path.parent / "inspect-logs"
+    log(f"Starting Inspect AI evaluation; logs: {inspect_log_dir}")
 
     task = Task(
         dataset=MemoryDataset(samples, name=dataset_path.stem, location=str(dataset_path)),
@@ -252,6 +257,7 @@ def run_inspect_mcq_evaluation(
     inspect_log = logs[0]
     if inspect_log.status != "success":
         raise RuntimeError(f"Inspect evaluation failed with status: {inspect_log.status}")
+    log("Inspect AI evaluation completed")
 
     result_items = _result_items_from_log_samples(
         cast(list[Any], inspect_log.samples or []),
@@ -271,4 +277,5 @@ def run_inspect_mcq_evaluation(
         },
     )
     write_json(output_path, payload)
+    log(f"Wrote result JSON: {output_path}")
     return payload

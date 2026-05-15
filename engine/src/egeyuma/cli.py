@@ -85,6 +85,10 @@ def run(
         int,
         typer.Option(help="Maximum generated tokens for API-backed models."),
     ] = 16,
+    quiet: Annotated[
+        bool,
+        typer.Option(help="Disable progress logging."),
+    ] = False,
     refresh_dataset: Annotated[
         bool,
         typer.Option(help="Refresh cached remote datasets before running."),
@@ -96,10 +100,15 @@ def run(
 ) -> None:
     """Run an MCQ evaluation."""
 
+    def log(message: str) -> None:
+        if not quiet:
+            console.print(message)
+
     dataset_path = resolve_dataset_path(
         dataset,
         refresh=refresh_dataset,
         limit=dataset_limit,
+        log=log,
     )
     result = run_mcq_evaluation(
         dataset_path=dataset_path,
@@ -111,6 +120,7 @@ def run(
         api_key=api_key,
         temperature=temperature,
         max_tokens=max_tokens,
+        log=log,
     )
     console.print(f"[green]Wrote[/green] {output}")
     console.print(f"Accuracy: {result['accuracy'] * 100:.2f}%")

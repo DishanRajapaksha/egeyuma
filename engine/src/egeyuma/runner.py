@@ -3,10 +3,12 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
+from time import monotonic
 from typing import Any, Literal
 
 from egeyuma.datasets.jsonl import load_mcq_jsonl, write_json
 from egeyuma.datasets.schema import MCQItem
+from egeyuma.logging import LogFn, null_log
 from egeyuma.models import create_model_adapter
 from egeyuma.prompts import render_mcq_prompt
 from egeyuma.scorers import extract_choice, is_correct
@@ -96,8 +98,12 @@ def run_native_mcq_evaluation(
     api_key: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 16,
+    log: LogFn = null_log,
 ) -> dict[str, Any]:
+    log(f"Loading dataset: {dataset_path}")
     dataset = load_mcq_jsonl(dataset_path)
+    log(f"Loaded {len(dataset)} MCQ items")
+    log(f"Creating model adapter: {model_name}")
     model = create_model_adapter(
         model_name,
         base_url=base_url,
@@ -107,12 +113,26 @@ def run_native_mcq_evaluation(
     )
 
     result_items: list[dict[str, Any]] = []
+    started_at = monotonic()
+    correct_count = 0
+    invalid_count = 0
 
-    for item in dataset:
+    for index, item in enumerate(dataset, start=1):
+        item_started_at = monotonic()
+        log(f"[{index}/{len(dataset)}] Generating response for {item.id}")
         prompt = render_mcq_prompt(item, prompt_name)
         response = model.generate(prompt)
         prediction = extract_choice(response.raw_response)
         correct = is_correct(prediction, item.answer_label)
+        correct_count += int(correct)
+        invalid_count += int(prediction is None)
+        running_accuracy = _accuracy(correct_count, index) * 100
+        log(
+            f"[{index}/{len(dataset)}] gold={item.answer_label} "
+            f"prediction={prediction or 'invalid'} correct={correct} "
+            f"elapsed={monotonic() - item_started_at:.1f}s "
+            f"accuracy={running_accuracy:.2f}% invalid={invalid_count}"
+        )
 
         result_items.append(
             build_result_item(
@@ -123,6 +143,7 @@ def run_native_mcq_evaluation(
             )
         )
 
+    log(f"Completed generation in {monotonic() - started_at:.1f}s")
     payload = build_result_payload(
         engine="native",
         dataset_path=dataset_path,
@@ -145,6 +166,7 @@ def run_mcq_evaluation(
     api_key: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 16,
+    log: LogFn = null_log,
 ) -> dict[str, Any]:
     if engine == "native":
         return run_native_mcq_evaluation(
@@ -156,6 +178,7 @@ def run_mcq_evaluation(
             api_key=api_key,
             temperature=temperature,
             max_tokens=max_tokens,
+            log=log,
         )
 
     if engine == "inspect":
@@ -170,6 +193,7 @@ def run_mcq_evaluation(
             api_key=api_key,
             temperature=temperature,
             max_tokens=max_tokens,
+            log=log,
         )
 
     raise ValueError(f"Unsupported engine {engine!r}. Supported engines: native, inspect")
