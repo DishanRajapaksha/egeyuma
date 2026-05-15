@@ -28,17 +28,18 @@ uv run sinhalaeval run \
   --output results/sample-run.json
 ```
 
-Use `--engine inspect` to run the same evaluation through Inspect AI while still writing
-Egeyuma's result JSON:
+Use `--engine inspect` to run through Inspect AI while still writing Egeyuma's result JSON:
 
 ```bash
 uv run sinhalaeval run \
   --engine inspect \
   --dataset data/samples/sinhalammlu_sample.jsonl \
-  --model constant/B \
+  --model openai/gpt-4o-mini \
   --prompt mcq_si_subject_v1 \
-  --output results/inspect-sample-run.json
+  --output results/inspect-openai-run.json
 ```
+
+For real models, the Inspect engine uses Inspect AI's native model-provider abstraction via its `generate()` solver. The `constant/A` ... `constant/E` models are the only exception: they use a tiny custom solver so smoke tests can run offline.
 
 Inspect logs are written next to the result file under `inspect-logs/`.
 
@@ -50,7 +51,7 @@ Install the optional OpenAI SDK dependency if you did not use `--all-extras`:
 uv sync --extra openai
 ```
 
-OpenAI-compatible providers use the Chat Completions API. The model name prefix selects defaults:
+OpenAI-compatible providers use the Chat Completions API in the native engine. The model name prefix selects defaults:
 
 - `openai/<model>` uses `OPENAI_API_KEY` and optional `OPENAI_BASE_URL`
 - `mistral/<model>` uses `MISTRAL_API_KEY` and `https://api.mistral.ai/v1`
@@ -108,7 +109,7 @@ uv run pytest
 ## Design principles
 
 - SinhalaEval owns the dataset schema, prompt versions, result schema, and reports.
-- Inspect AI can be used as an execution engine, but the data and result contracts stay framework-neutral.
+- Inspect AI is used as an execution engine, but the data and result contracts stay framework-neutral.
 - JSONL in, JSON out. Boring pipes, sharp knives.
 
 ## Current scope
@@ -117,11 +118,12 @@ Implemented scaffold:
 
 - MCQ dataset schema
 - JSONL loader and validator
+- raw SinhalaMMLU schema conversion with collision-resistant IDs
 - prompt template loading
 - exact-choice scorer
 - deterministic constant model adapter for smoke tests
-- OpenAI-compatible model adapter for OpenAI, Mistral, and LM Studio-style APIs
-- Inspect AI execution engine
+- OpenAI-compatible model adapter for OpenAI, Mistral, and LM Studio-style APIs in the native engine
+- Inspect AI execution engine using native Inspect providers for real models
 - result writer
 - basic report command
 
