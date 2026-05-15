@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from egeyuma.datasets.schema import MCQItem
+from egeyuma.datasets.schema import MCQItem, coerce_mcq_item
 
 
 class DatasetValidationError(Exception):
@@ -32,8 +32,10 @@ def load_mcq_jsonl(path: Path) -> list[MCQItem]:
     items: list[MCQItem] = []
     for line_number, raw in enumerate(read_jsonl(path), start=1):
         try:
-            items.append(MCQItem.model_validate(raw))
+            items.append(coerce_mcq_item(raw))
         except ValidationError as exc:
+            raise DatasetValidationError(f"{path}:{line_number}: {exc}") from exc
+        except ValueError as exc:
             raise DatasetValidationError(f"{path}:{line_number}: {exc}") from exc
     return items
 
