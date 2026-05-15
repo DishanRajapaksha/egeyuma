@@ -4,7 +4,6 @@ from pathlib import Path
 
 from egeyuma.datasets.schema import MCQItem
 
-
 PROMPT_DIR = Path(__file__).resolve().parent / "prompt_templates"
 
 

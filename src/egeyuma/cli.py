@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated, Literal
 
 import typer
 from rich.console import Console
@@ -28,10 +29,43 @@ def validate(dataset: Path) -> None:
 
 @app.command()
 def run(
-    dataset: Path = typer.Option(..., help="Path to canonical MCQ JSONL dataset."),
-    model: str = typer.Option("constant/B", help="Model name. Scaffold supports constant/A ... constant/E."),
-    prompt: str = typer.Option("mcq_si_subject_v1", help="Prompt template name."),
-    output: Path = typer.Option(..., help="Output result JSON path."),
+    dataset: Annotated[Path, typer.Option(help="Path to canonical MCQ JSONL dataset.")],
+    output: Annotated[Path, typer.Option(help="Output result JSON path.")],
+    engine: Annotated[
+        Literal["native", "inspect"],
+        typer.Option(help="Evaluation engine: native or inspect."),
+    ] = "native",
+    model: Annotated[
+        str,
+        typer.Option(
+            help=(
+                "Model name. Supports constant/A ... constant/E, openai/<model>, "
+                "mistral/<model>, lmstudio/<model>."
+            ),
+        ),
+    ] = "constant/B",
+    prompt: Annotated[
+        str,
+        typer.Option(help="Prompt template name."),
+    ] = "mcq_si_subject_v1",
+    base_url: Annotated[
+        str | None,
+        typer.Option(
+            help="Override OpenAI-compatible API base URL, for example http://localhost:1234/v1."
+        ),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        typer.Option(help="Override API key. Defaults to provider-specific environment variables."),
+    ] = None,
+    temperature: Annotated[
+        float,
+        typer.Option(help="Generation temperature for API-backed models."),
+    ] = 0.0,
+    max_tokens: Annotated[
+        int,
+        typer.Option(help="Maximum generated tokens for API-backed models."),
+    ] = 16,
 ) -> None:
     """Run an MCQ evaluation."""
 
@@ -40,6 +74,11 @@ def run(
         model_name=model,
         prompt_name=prompt,
         output_path=output,
+        engine=engine,
+        base_url=base_url,
+        api_key=api_key,
+        temperature=temperature,
+        max_tokens=max_tokens,
     )
     console.print(f"[green]Wrote[/green] {output}")
     console.print(f"Accuracy: {result['accuracy'] * 100:.2f}%")

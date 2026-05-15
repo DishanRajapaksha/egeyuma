@@ -4,7 +4,6 @@ import re
 
 from egeyuma.datasets.schema import ANSWER_LABELS
 
-
 ANSWER_PATTERN = re.compile(r"\b([A-E])\b", re.IGNORECASE)
 
 

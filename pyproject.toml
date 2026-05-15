@@ -19,16 +19,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-  "pytest>=8,<9",
-  "ruff>=0.8,<1",
-  "mypy>=1.13,<2"
-]
 inspect = [
   "inspect-ai>=0.3"
 ]
 openai = [
   "openai>=1.0"
+]
+
+[dependency-groups]
+dev = [
+  "inspect-ai>=0.3",
+  "mypy>=1.13,<2",
+  "pytest>=8,<9",
+  "ruff>=0.8,<1"
 ]
 
 [project.scripts]
