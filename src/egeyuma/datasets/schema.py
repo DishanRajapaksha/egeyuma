@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -80,11 +82,24 @@ class SinhalaMMLURawItem(BaseModel):
         source = self.metadata.get("source")
         difficulty = self.metadata.get("difficulty")
         grade = self.metadata.get("grade")
+        year = self.metadata.get("year")
+        paper_type = self.metadata.get("type")
 
-        stable_id_parts = ["sinhalammlu", self.category, self.subject, str(self.q_no)]
-        if grade is not None:
-            stable_id_parts.insert(3, f"grade_{grade}")
-        stable_id = "_".join(_slugify(part) for part in stable_id_parts if str(part).strip())
+        # q_no is only local to a paper/subject. Keep a readable prefix, then add a
+        # content/source hash so merged SinhalaMMLU files cannot silently collide.
+        stable_id_parts = [
+            "sinhalammlu",
+            self.category,
+            self.subject,
+            f"grade_{grade}" if grade is not None else None,
+            f"year_{year}" if year is not None else None,
+            paper_type,
+            f"q_{self.q_no}",
+        ]
+        stable_id_prefix = "_".join(
+            _slugify(part) for part in stable_id_parts if part is not None and str(part).strip()
+        )
+        stable_id = f"{stable_id_prefix}_{_short_raw_hash(self)}"
 
         return MCQItem(
             id=stable_id,
@@ -116,6 +131,23 @@ def coerce_mcq_item(raw: dict[str, Any]) -> MCQItem:
         return SinhalaMMLURawItem.model_validate(raw).to_mcq_item()
 
     return MCQItem.model_validate(raw)
+
+
+def _short_raw_hash(item: SinhalaMMLURawItem) -> str:
+    payload = {
+        "q_no": item.q_no,
+        "subject": item.subject,
+        "category": item.category,
+        "question": item.question,
+        "choices": item.choices,
+        "answer": item.answer,
+        "source": item.metadata.get("source"),
+        "year": item.metadata.get("year"),
+        "type": item.metadata.get("type"),
+        "grade": item.metadata.get("grade"),
+    }
+    encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha1(encoded).hexdigest()[:10]
 
 
 def _slugify(value: object) -> str:
