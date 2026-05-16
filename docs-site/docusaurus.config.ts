@@ -7,7 +7,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://dishanrajapaksha.github.io',
-  baseUrl: '/egeyuma/',
+  baseUrl: '/egeyuma/docs/',
   organizationName: 'DishanRajapaksha',
   projectName: 'egeyuma',
 
@@ -69,7 +69,7 @@ const config: Config = {
           type: 'html',
           position: 'left',
           value:
-            '<a class="navbar__item navbar__link" href="/egeyuma/benchmarks/" data-no-broken-link-check="true">Benchmarks</a>'
+            '<a class="navbar__item navbar__link" href="/egeyuma/" data-no-broken-link-check="true">Benchmarks</a>'
         },
         {
           href: 'https://github.com/DishanRajapaksha/egeyuma',
@@ -85,7 +85,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             { label: 'Engine', to: '/engine/' },
-            { label: 'Dashboard', to: '/dashboard/' }
+            { label: 'Dashboard', to: '/dashboard/' },
+            { label: 'Benchmarks', href: 'https://dishanrajapaksha.github.io/egeyuma/' }
           ]
         },
         {
