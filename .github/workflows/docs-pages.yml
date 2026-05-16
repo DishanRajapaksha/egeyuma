@@ -1,6 +1,7 @@
-name: Publish docs
+name: Publish docs and benchmarks
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -23,6 +24,7 @@ concurrency:
 
 jobs:
   build:
+    name: Build combined Pages artifact
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,11 +42,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Install dependencies
+      - name: Install docs dependencies
         working-directory: docs-site
         run: npm ci
 
-      - name: Build docs
+      - name: Build docs site
         working-directory: docs-site
         run: npm run build
 
@@ -52,23 +54,26 @@ jobs:
         working-directory: dashboard
         run: npm ci
 
-      - name: Build dashboard
+      - name: Build benchmark dashboard
         working-directory: dashboard
         env:
           BASE_PATH: /egeyuma/benchmarks
         run: npm run build
 
-      - name: Add dashboard to Pages artifact
+      - name: Add dashboard under docs artifact
         run: |
           mkdir -p docs-site/build/benchmarks
           cp -R dashboard/build/. docs-site/build/benchmarks/
+          test -f docs-site/build/index.html
+          test -f docs-site/build/benchmarks/index.html
 
-      - name: Upload Pages artifact
+      - name: Upload combined Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs-site/build
 
   deploy:
+    name: Deploy combined Pages site
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
