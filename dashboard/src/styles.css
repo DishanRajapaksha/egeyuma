@@ -190,8 +190,21 @@ td small {
   font-size: 0.76rem;
 }
 
-tr.highlight td {
-  background: #f1f7ff;
+.leaderboard tbody tr {
+  cursor: pointer;
+}
+
+.leaderboard tbody tr:hover td {
+  background: #f8fbff;
+}
+
+.leaderboard tbody tr:focus-visible td {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+tr.selected td {
+  background: #eaf3ff;
 }
 
 .run-card {
