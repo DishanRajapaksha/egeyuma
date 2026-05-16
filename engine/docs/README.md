@@ -32,6 +32,27 @@ The `sinhalammlu` dataset alias resolves the restricted Hugging Face dataset
 under `engine/.cache/egeyuma/sinhalammlu.jsonl`. Set `HF_TOKEN` in the shell or
 `engine/.env` before using the alias.
 
+## Sinhala Text Normalisation
+
+Future Sinhala evaluation work may benefit from a dedicated text normalisation step
+before scoring. The most relevant upstream project found so far is
+[`google-research/nisaba`](https://github.com/google-research/nisaba), a Google
+Research library for script processing based on finite-state transducers.
+
+Nisaba is useful plumbing for Unicode and script hygiene, especially for Sinhala and
+other Indic scripts. It may help with:
+
+- NFC and visual normalisation before exact-match or label extraction.
+- Detecting malformed Sinhala character sequences in datasets or model outputs.
+- Making answer parsing less brittle when equivalent-looking text uses different
+  Unicode sequences.
+- Future transliteration or script-validation experiments.
+
+It should not be treated as a semantic grader, model evaluator, dashboard, or Inspect
+AI replacement. If added, keep it as an optional preprocessing layer in the dataset
+or response-normalisation path, then measure whether it improves invalid-response
+rates and exact-match stability.
+
 ## Model Providers
 
 The native runner supports:
