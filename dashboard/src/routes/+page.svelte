@@ -30,7 +30,7 @@
   };
 
   type PageData = {
-    resultsDir: string;
+    resultsPath: string;
     runs: DashboardRun[];
   };
 
@@ -78,8 +78,8 @@
       <h1>LLM Benchmark Dashboard</h1>
     </div>
     <div class="source-path">
-      <span>Results directory</span>
-      <code>{data.resultsDir}</code>
+      <span>Published results</span>
+      <code>{data.resultsPath}</code>
     </div>
   </header>
 
@@ -252,7 +252,7 @@
   {:else}
     <section class="panel empty">
       <h2>No result files found</h2>
-      <p>Run an engine evaluation and write JSON into {data.resultsDir}.</p>
+      <p>Publish result JSON files into {data.resultsPath}.</p>
     </section>
   {/if}
 </main>

@@ -65,6 +65,11 @@ npm run dev
 
 ```bash
 cd dashboard
+BASE_PATH=/benchmarks npm run build
+```
+
+```bash
+cd dashboard
 npm run check
 npm run build
 ```

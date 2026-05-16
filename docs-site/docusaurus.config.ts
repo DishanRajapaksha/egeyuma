@@ -64,7 +64,13 @@ const config: Config = {
       title: 'Egeyuma',
       items: [
         { to: '/engine/', label: 'Engine', position: 'left' },
-        { to: '/dashboard/', label: 'Dashboard', position: 'left' },
+        { to: '/dashboard/', label: 'Dashboard Docs', position: 'left' },
+        {
+          type: 'html',
+          position: 'left',
+          value:
+            '<a class="navbar__item navbar__link" href="/egeyuma/benchmarks/" data-no-broken-link-check="true">Benchmarks</a>'
+        },
         {
           href: 'https://github.com/DishanRajapaksha/egeyuma',
           label: 'GitHub',

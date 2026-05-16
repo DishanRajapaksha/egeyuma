@@ -25,6 +25,7 @@ dashboard/node_modules/
 dashboard/.svelte-kit/
 dashboard/build/
 dashboard/.vite/
+dashboard/static/results/**
 docs-site/.docusaurus/
 docs-site/build/
 
@@ -38,7 +39,9 @@ dashboard/.env.*
 .cache/
 
 # Evaluation outputs
-results/
+results/*
+!results/published/
+!results/published/*.json
 *.sqlite
 
 # OS/editor

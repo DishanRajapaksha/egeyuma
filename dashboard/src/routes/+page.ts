@@ -1,5 +1,6 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { base } from '$app/paths';
+
+export const prerender = true;
 
 type ResultItem = {
   id: string;
@@ -31,12 +32,17 @@ type ResultPayload = {
   items: ResultItem[];
 };
 
+type ResultIndex = {
+  runs: Array<{
+    filename: string;
+    modified_at: string;
+  }>;
+};
+
 type DashboardRun = ResultPayload & {
   filename: string;
   modified_at: string;
 };
-
-const resultsDir = resolve(process.env.EGEYUMA_RESULTS_DIR ?? '../results');
 
 function isResultPayload(value: unknown): value is ResultPayload {
   if (!value || typeof value !== 'object') {
@@ -54,50 +60,44 @@ function isResultPayload(value: unknown): value is ResultPayload {
   );
 }
 
-async function loadResultFile(filename: string): Promise<DashboardRun | null> {
-  const path = resolve(resultsDir, filename);
-  const [raw, metadata] = await Promise.all([readFile(path, 'utf-8'), stat(path)]);
-  const parsed: unknown = JSON.parse(raw);
-
-  if (!isResultPayload(parsed)) {
-    return null;
+async function fetchJson<T>(fetchFn: typeof fetch, path: string): Promise<T> {
+  const response = await fetchFn(path);
+  if (!response.ok) {
+    throw new Error(`Failed to load ${path}: ${response.status}`);
   }
-
-  return {
-    ...parsed,
-    filename,
-    modified_at: metadata.mtime.toISOString()
-  };
+  return (await response.json()) as T;
 }
 
-export async function load() {
-  let filenames: string[] = [];
+export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
+  const resultsPath = `${base}/results`;
 
   try {
-    filenames = (await readdir(resultsDir)).filter((filename) => filename.endsWith('.json'));
+    const index = await fetchJson<ResultIndex>(fetch, `${resultsPath}/index.json`);
+    const runs = await Promise.all(
+      index.runs.map(async (entry) => {
+        const payload = await fetchJson<unknown>(fetch, `${resultsPath}/${entry.filename}`);
+        if (!isResultPayload(payload)) {
+          return null;
+        }
+
+        return {
+          ...payload,
+          filename: entry.filename,
+          modified_at: entry.modified_at
+        };
+      })
+    );
+
+    return {
+      resultsPath,
+      runs: runs
+        .filter((run): run is DashboardRun => run !== null)
+        .sort((left, right) => right.modified_at.localeCompare(left.modified_at))
+    };
   } catch {
     return {
-      resultsDir,
+      resultsPath,
       runs: [] satisfies DashboardRun[]
     };
   }
-
-  const loaded = await Promise.all(
-    filenames.map(async (filename) => {
-      try {
-        return await loadResultFile(filename);
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  const runs = loaded
-    .filter((run): run is DashboardRun => run !== null)
-    .sort((left, right) => right.modified_at.localeCompare(left.modified_at));
-
-  return {
-    resultsDir,
-    runs
-  };
 }

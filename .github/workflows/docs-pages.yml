@@ -7,8 +7,10 @@ on:
     paths:
       - ".github/workflows/docs-pages.yml"
       - "docs-site/**"
+      - "dashboard/**"
       - "engine/docs/**"
       - "dashboard/docs/**"
+      - "results/published/**"
 
 permissions:
   contents: read
@@ -31,7 +33,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: docs-site/package-lock.json
+          cache-dependency-path: |
+            docs-site/package-lock.json
+            dashboard/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -43,6 +47,21 @@ jobs:
       - name: Build docs
         working-directory: docs-site
         run: npm run build
+
+      - name: Install dashboard dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Build dashboard
+        working-directory: dashboard
+        env:
+          BASE_PATH: /egeyuma/benchmarks
+        run: npm run build
+
+      - name: Add dashboard to Pages artifact
+        run: |
+          mkdir -p docs-site/build/benchmarks
+          cp -R dashboard/build/. docs-site/build/benchmarks/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

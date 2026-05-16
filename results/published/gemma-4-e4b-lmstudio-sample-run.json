@@ -1,0 +1,56 @@
+{
+  "run_id": "2026-05-16T04:41:50.667396+00:00",
+  "framework": "egeyuma",
+  "engine": "native",
+  "model": "lmstudio/google/gemma-4-e4b",
+  "task": "mcq",
+  "dataset": "../data/samples/sinhalammlu_sample.jsonl",
+  "prompt_version": "mcq_si_subject_v1",
+  "total": 2,
+  "correct": 2,
+  "accuracy": 1.0,
+  "invalid_response_count": 0,
+  "invalid_response_rate": 0.0,
+  "breakdowns": {
+    "subject": {
+      "Arts": 1.0,
+      "Science": 1.0
+    },
+    "domain": {
+      "humanities": 1.0,
+      "stem": 1.0
+    },
+    "difficulty": {
+      "easy": 1.0
+    },
+    "language_style": {
+      "formal_sinhala": 1.0
+    }
+  },
+  "items": [
+    {
+      "id": "sinhalammlu_humanities_arts_grade_6_year_2022_p_nwp_3_q_1_e8a4a3dc5d",
+      "gold": "A",
+      "prediction": "A",
+      "raw_response": "A",
+      "correct": true,
+      "subject": "Arts",
+      "domain": "humanities",
+      "difficulty": "easy",
+      "language_style": "formal_sinhala",
+      "source": "https://pastpapers.wiki/2022-grade-06-art-3rd-term-test-paper-with-answers-north-western-province/?swcfpc=1"
+    },
+    {
+      "id": "sinhalammlu_stem_science_grade_6_q_2_1ce416cb6a",
+      "gold": "B",
+      "prediction": "B",
+      "raw_response": "B",
+      "correct": true,
+      "subject": "Science",
+      "domain": "stem",
+      "difficulty": "easy",
+      "language_style": "formal_sinhala",
+      "source": "manual_sample"
+    }
+  ]
+}
