@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+from typing import Any
 
 import pytest
 
 from egeyuma.datasets.jsonl import DatasetValidationError, load_mcq_jsonl, write_json
 
 
-RAW_ITEM = {
+RAW_ITEM: dict[str, Any] = {
     "q_no": 1,
     "subject": "Science",
     "category": "stem",
@@ -17,7 +19,7 @@ RAW_ITEM = {
     "metadata": {"difficulty": "easy", "grade": 6, "source": "manual_sample"},
 }
 
-CANONICAL_ITEM = {
+CANONICAL_ITEM: dict[str, Any] = {
     "id": "canonical_science_001",
     "question": "ජලයේ රසායනික සූත්‍රය කුමක්ද?",
     "choices": ["CO2", "H2O", "O2", "NaCl"],
@@ -28,7 +30,7 @@ CANONICAL_ITEM = {
 }
 
 
-def test_load_mcq_jsonl_accepts_raw_and_canonical_records(tmp_path) -> None:
+def test_load_mcq_jsonl_accepts_raw_and_canonical_records(tmp_path: Path) -> None:
     dataset_path = tmp_path / "dataset.jsonl"
     dataset_path.write_text(
         "\n".join(
@@ -49,7 +51,7 @@ def test_load_mcq_jsonl_accepts_raw_and_canonical_records(tmp_path) -> None:
     assert items[1].answer_label == "B"
 
 
-def test_load_mcq_jsonl_skips_blank_lines(tmp_path) -> None:
+def test_load_mcq_jsonl_skips_blank_lines(tmp_path: Path) -> None:
     dataset_path = tmp_path / "dataset.jsonl"
     dataset_path.write_text(
         f"\n{json.dumps(CANONICAL_ITEM, ensure_ascii=False)}\n\n",
@@ -62,7 +64,7 @@ def test_load_mcq_jsonl_skips_blank_lines(tmp_path) -> None:
     assert items[0].id == "canonical_science_001"
 
 
-def test_load_mcq_jsonl_reports_invalid_json_with_line_number(tmp_path) -> None:
+def test_load_mcq_jsonl_reports_invalid_json_with_line_number(tmp_path: Path) -> None:
     dataset_path = tmp_path / "bad.jsonl"
     dataset_path.write_text("{not-json}\n", encoding="utf-8")
 
@@ -70,7 +72,7 @@ def test_load_mcq_jsonl_reports_invalid_json_with_line_number(tmp_path) -> None:
         load_mcq_jsonl(dataset_path)
 
 
-def test_load_mcq_jsonl_reports_validation_error_with_line_number(tmp_path) -> None:
+def test_load_mcq_jsonl_reports_validation_error_with_line_number(tmp_path: Path) -> None:
     dataset_path = tmp_path / "bad-schema.jsonl"
     bad_item = {**CANONICAL_ITEM, "answer_index": 3, "answer_label": "B"}
     dataset_path.write_text(json.dumps(bad_item, ensure_ascii=False), encoding="utf-8")
@@ -79,7 +81,7 @@ def test_load_mcq_jsonl_reports_validation_error_with_line_number(tmp_path) -> N
         load_mcq_jsonl(dataset_path)
 
 
-def test_write_json_creates_parent_directory(tmp_path) -> None:
+def test_write_json_creates_parent_directory(tmp_path: Path) -> None:
     output_path = tmp_path / "nested" / "result.json"
 
     write_json(output_path, {"සිංහල": "ok"})
