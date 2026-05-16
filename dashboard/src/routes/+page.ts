@@ -2,34 +2,55 @@ import { base } from '$app/paths';
 
 export const prerender = true;
 
+type ResultChoice = {
+  label: string;
+  text: string;
+};
+
 type ResultItem = {
   id: string;
+  question?: string;
+  choices?: ResultChoice[];
   gold: string;
   prediction: string | null;
   raw_response: string;
   correct: boolean;
+  failure_category?: string;
+  prompt?: string | null;
   subject: string | null;
   domain: string | null;
   difficulty: string | null;
   language_style: string;
   source: string | null;
+  metadata?: Record<string, unknown>;
 };
 
 type ResultPayload = {
+  schema_version?: string;
   run_id: string;
+  generated_at?: string;
   framework: string;
   engine: string;
   model: string;
+  model_metadata?: Record<string, unknown>;
   task: string;
   dataset: string;
+  dataset_coverage?: Record<string, unknown>;
   prompt_version: string;
+  prompt_template?: string;
+  run_notes?: string | null;
+  ci?: Record<string, unknown>;
   total: number;
   correct: number;
   accuracy: number;
   invalid_response_count: number;
   invalid_response_rate: number;
+  failure_categories?: Record<string, number>;
+  answer_distribution?: Record<string, number>;
+  confusion_matrix?: Record<string, Record<string, number>>;
   breakdowns: Record<string, Record<string, number>>;
   items: ResultItem[];
+  metadata?: Record<string, unknown>;
 };
 
 type ResultIndex = {
