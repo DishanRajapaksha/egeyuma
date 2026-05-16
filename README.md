@@ -13,7 +13,7 @@ uv sync --all-extras --dev
 ## Validate a dataset
 
 ```bash
-uv run sinhalaeval validate data/samples/sinhalammlu_sample.jsonl
+uv run egeyuma validate data/samples/sinhalammlu_sample.jsonl
 ```
 
 ## Run a smoke-test evaluation
@@ -21,7 +21,7 @@ uv run sinhalaeval validate data/samples/sinhalammlu_sample.jsonl
 The scaffold ships with a deterministic `constant` model provider so the pipeline can be tested without API keys.
 
 ```bash
-uv run sinhalaeval run \
+uv run egeyuma run \
   --dataset data/samples/sinhalammlu_sample.jsonl \
   --model constant/B \
   --prompt mcq_si_subject_v1 \
@@ -31,7 +31,7 @@ uv run sinhalaeval run \
 Use `--engine inspect` to run through Inspect AI while still writing Egeyuma's result JSON:
 
 ```bash
-uv run sinhalaeval run \
+uv run egeyuma run \
   --engine inspect \
   --dataset data/samples/sinhalammlu_sample.jsonl \
   --model openai/gpt-4o-mini \
@@ -61,7 +61,7 @@ Mistral example:
 
 ```bash
 export MISTRAL_API_KEY=...
-uv run sinhalaeval run \
+uv run egeyuma run \
   --dataset data/samples/sinhalammlu_sample.jsonl \
   --model mistral/mistral-small-latest \
   --prompt mcq_si_subject_v1 \
@@ -71,7 +71,7 @@ uv run sinhalaeval run \
 LM Studio local server example:
 
 ```bash
-uv run sinhalaeval run \
+uv run egeyuma run \
   --dataset data/samples/sinhalammlu_sample.jsonl \
   --model lmstudio/local-model \
   --prompt mcq_si_subject_v1 \
@@ -81,7 +81,7 @@ uv run sinhalaeval run \
 Use `--base-url` and `--api-key` for any other OpenAI-compatible endpoint:
 
 ```bash
-uv run sinhalaeval run \
+uv run egeyuma run \
   --dataset data/samples/sinhalammlu_sample.jsonl \
   --model openai/my-model \
   --base-url http://localhost:1234/v1 \
@@ -92,7 +92,7 @@ uv run sinhalaeval run \
 ## Generate a report
 
 ```bash
-uv run sinhalaeval report results/sample-run.json
+uv run egeyuma report results/sample-run.json
 ```
 
 ## Development
@@ -108,7 +108,7 @@ uv run pytest
 
 ## Design principles
 
-- SinhalaEval owns the dataset schema, prompt versions, result schema, and reports.
+- Egeyuma owns the dataset schema, prompt versions, result schema, and reports.
 - Inspect AI is used as an execution engine, but the data and result contracts stay framework-neutral.
 - JSONL in, JSON out. Boring pipes, sharp knives.
 
