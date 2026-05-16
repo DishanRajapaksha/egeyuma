@@ -66,9 +66,9 @@
   let promptFilter = $state('all');
   let minQuestions = $state(50);
   let sortKey = $state<SortKey>('accuracy');
-  let selectedFilename = $state<string>(data.runs[0]?.filename ?? '');
-  let compareLeftFilename = $state<string>(data.runs[0]?.filename ?? '');
-  let compareRightFilename = $state<string>(data.runs[1]?.filename ?? data.runs[0]?.filename ?? '');
+  let selectedFilename = $state<string>('');
+  let compareLeftFilename = $state<string>('');
+  let compareRightFilename = $state<string>('');
   let sampleTab = $state<SampleTab>('wrong');
 
   const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`;
@@ -206,6 +206,23 @@
   const compareLeft = $derived(runs.find((run) => run.filename === compareLeftFilename) ?? runs[0]);
   const compareRight = $derived(runs.find((run) => run.filename === compareRightFilename) ?? runs[1] ?? runs[0]);
   const comparison = $derived(compareRuns(compareLeft, compareRight));
+
+  $effect(() => {
+    const firstRun = runs[0]?.filename ?? '';
+    const secondRun = runs[1]?.filename ?? firstRun;
+
+    if (!selectedFilename && firstRun) {
+      selectedFilename = firstRun;
+    }
+
+    if (!compareLeftFilename && firstRun) {
+      compareLeftFilename = firstRun;
+    }
+
+    if (!compareRightFilename && secondRun) {
+      compareRightFilename = secondRun;
+    }
+  });
 </script>
 
 <svelte:head>
