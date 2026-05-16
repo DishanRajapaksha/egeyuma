@@ -337,16 +337,15 @@
 </script>
 
 <svelte:head>
-  <title>Egeyuma Dashboard</title>
-  <meta name="description" content="Dashboard for Sinhala, Singlish, and Sri Lankan-context LLM evaluation results." />
+  <title>ඇගැයුම</title>
+  <meta name="description" content="Sinhala LLM evaluation results." />
 </svelte:head>
 
 <main class="app-shell">
   <header class="topbar">
     <div>
-      <p class="eyebrow">Egeyuma</p>
-      <h1>LLM Benchmark Dashboard</h1>
-      <p class="lede">Sinhala and Sri Lankan-context LLM evaluation results.</p>
+      <h1>ඇගැයුම</h1>
+      <p class="lede">Sinhala LLM evaluation results.</p>
     </div>
     <div class="topbar-actions">
       <a class="docs-link" href={docsHref}>Docs</a>
