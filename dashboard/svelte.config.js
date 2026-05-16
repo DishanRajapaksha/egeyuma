@@ -14,6 +14,17 @@ const config = {
     }),
     paths: {
       base: process.env.BASE_PATH ?? ''
+    },
+    prerender: {
+      handleHttpError: ({ path, referrer, message }) => {
+        const ignoredLinkedAssets = [`${process.env.BASE_PATH ?? ''}/docs/`, `${process.env.BASE_PATH ?? ''}/results`];
+
+        if (referrer === `${process.env.BASE_PATH ?? ''}/` && ignoredLinkedAssets.includes(path)) {
+          return;
+        }
+
+        throw new Error(message);
+      }
     }
   }
 };
