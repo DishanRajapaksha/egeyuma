@@ -1,5 +1,12 @@
 # ඇගැයුම - Egeyuma
 
+## Published Pages layout
+
+```text
+https://dishanrajapaksha.github.io/egeyuma/       # benchmark dashboard
+https://dishanrajapaksha.github.io/egeyuma/docs/  # documentation site
+```
+
 ## Engine
 
 ```bash
@@ -65,7 +72,7 @@ npm run dev
 
 ```bash
 cd dashboard
-BASE_PATH=/benchmarks npm run build
+BASE_PATH=/egeyuma npm run build
 ```
 
 ```bash
