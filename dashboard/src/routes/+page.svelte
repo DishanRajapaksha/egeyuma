@@ -50,6 +50,22 @@
     runCount === 0 ? 0 : Math.max(...data.runs.map((run) => run.accuracy))
   );
 
+  let selectedFilename = $state<string | null>(data.runs[0]?.filename ?? null);
+  const selectedRun = $derived(
+    data.runs.find((run) => run.filename === selectedFilename) ?? data.runs[0]
+  );
+
+  const selectRun = (filename: string) => {
+    selectedFilename = filename;
+  };
+
+  const selectRunFromKeyboard = (event: KeyboardEvent, filename: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectRun(filename);
+    }
+  };
+
   const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`;
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(undefined, {
@@ -106,13 +122,13 @@
     </article>
   </section>
 
-  {#if latest}
+  {#if selectedRun}
     <section class="content-grid">
       <article class="panel leaderboard">
         <div class="section-heading">
           <div>
             <h2>Leaderboard</h2>
-            <p>Ranked by accuracy, then latest run.</p>
+            <p>Ranked by accuracy, then latest run. Select a row to inspect it.</p>
           </div>
           <span class="count">{sortedByAccuracy.length} runs</span>
         </div>
@@ -132,7 +148,15 @@
             </thead>
             <tbody>
               {#each sortedByAccuracy as run, index}
-                <tr class:highlight={run.filename === latest.filename}>
+                <tr
+                  class:selected={run.filename === selectedRun.filename}
+                  tabindex="0"
+                  role="button"
+                  aria-pressed={run.filename === selectedRun.filename}
+                  aria-label={`Select ${run.model} run from ${run.filename}`}
+                  onclick={() => selectRun(run.filename)}
+                  onkeydown={(event) => selectRunFromKeyboard(event, run.filename)}
+                >
                   <td>{index + 1}</td>
                   <td>
                     <strong>{run.model}</strong>
@@ -153,32 +177,32 @@
       <aside class="panel run-card">
         <div class="section-heading">
           <div>
-            <h2>Latest Run</h2>
-            <p>{latest.filename}</p>
+            <h2>Selected Run</h2>
+            <p>{selectedRun.filename}</p>
           </div>
         </div>
 
         <div class="accuracy-ring">
-          <strong>{formatPercent(latest.accuracy)}</strong>
-          <span>{latest.correct}/{latest.total}</span>
+          <strong>{formatPercent(selectedRun.accuracy)}</strong>
+          <span>{selectedRun.correct}/{selectedRun.total}</span>
         </div>
 
         <dl class="metadata-grid compact">
           <div>
             <dt>Model</dt>
-            <dd>{latest.model}</dd>
+            <dd>{selectedRun.model}</dd>
           </div>
           <div>
             <dt>Dataset</dt>
-            <dd>{latest.dataset}</dd>
+            <dd>{selectedRun.dataset}</dd>
           </div>
           <div>
             <dt>Prompt</dt>
-            <dd>{latest.prompt_version}</dd>
+            <dd>{selectedRun.prompt_version}</dd>
           </div>
           <div>
             <dt>Run ID</dt>
-            <dd>{latest.run_id}</dd>
+            <dd>{selectedRun.run_id}</dd>
           </div>
         </dl>
       </aside>
@@ -188,12 +212,12 @@
       <div class="section-heading">
         <div>
           <h2>Breakdowns</h2>
-          <p>Accuracy by subject, domain, difficulty, and language style.</p>
+          <p>Accuracy by subject, domain, difficulty, and language style for the selected run.</p>
         </div>
       </div>
 
       <div class="breakdown-grid">
-        {#each breakdownEntries(latest) as item}
+        {#each breakdownEntries(selectedRun) as item}
           <article class="breakdown">
             <div>
               <span>{item.group}</span>
@@ -212,7 +236,7 @@
       <div class="section-heading">
         <div>
           <h2>Samples</h2>
-          <p>Gold labels, predictions, and response validity.</p>
+          <p>Gold labels, predictions, and response validity for the selected run.</p>
         </div>
       </div>
 
@@ -229,7 +253,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each latest.items as item}
+            {#each selectedRun.items as item}
               <tr>
                 <td>
                   <code>{item.id}</code>
