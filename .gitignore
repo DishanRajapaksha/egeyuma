@@ -12,10 +12,27 @@ htmlcov/
 # Virtual environments
 .venv/
 venv/
+engine/.venv/
+engine/venv/
+
+# uv
+uv.lock
+engine/uv.lock
+
+# Node / Svelte
+node_modules/
+dashboard/node_modules/
+dashboard/.svelte-kit/
+dashboard/build/
+dashboard/.vite/
 
 # Local configuration
 .env
 .env.*
+engine/.env
+engine/.env.*
+dashboard/.env
+dashboard/.env.*
 
 # Evaluation outputs
 results/
