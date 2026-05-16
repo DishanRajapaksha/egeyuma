@@ -57,20 +57,21 @@ jobs:
       - name: Build benchmark dashboard
         working-directory: dashboard
         env:
-          BASE_PATH: /egeyuma/benchmarks
+          BASE_PATH: /egeyuma
         run: npm run build
 
-      - name: Add dashboard under docs artifact
+      - name: Compose Pages artifact
         run: |
-          mkdir -p docs-site/build/benchmarks
-          cp -R dashboard/build/. docs-site/build/benchmarks/
-          test -f docs-site/build/index.html
-          test -f docs-site/build/benchmarks/index.html
+          mkdir -p pages-build/docs
+          cp -R dashboard/build/. pages-build/
+          cp -R docs-site/build/. pages-build/docs/
+          test -f pages-build/index.html
+          test -f pages-build/docs/index.html
 
       - name: Upload combined Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-site/build
+          path: pages-build
 
   deploy:
     name: Deploy combined Pages site
