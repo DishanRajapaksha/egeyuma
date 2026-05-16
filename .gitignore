@@ -25,6 +25,8 @@ dashboard/node_modules/
 dashboard/.svelte-kit/
 dashboard/build/
 dashboard/.vite/
+docs-site/.docusaurus/
+docs-site/build/
 
 # Local configuration
 .env
