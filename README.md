@@ -1,4 +1,4 @@
-# Egeyuma
+# ඇගැයුම - Egeyuma
 
 Evaluation tooling for Sinhala, Singlish, and Sri Lankan-context LLMs.
 
