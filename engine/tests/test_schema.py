@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
 from egeyuma.datasets.schema import MCQItem, SinhalaMMLURawItem, coerce_mcq_item
 
 
-RAW_SINHALAMMLU_ITEM = {
+RAW_SINHALAMMLU_ITEM: dict[str, Any] = {
     "q_no": 1,
     "subject": "Arts",
     "category": "humanities",
@@ -53,9 +55,10 @@ def test_raw_sinhalammlu_id_is_stable() -> None:
 
 def test_raw_sinhalammlu_id_changes_when_source_changes() -> None:
     first = SinhalaMMLURawItem.model_validate(RAW_SINHALAMMLU_ITEM).to_mcq_item()
+    metadata = dict(RAW_SINHALAMMLU_ITEM["metadata"])
     modified = {
         **RAW_SINHALAMMLU_ITEM,
-        "metadata": {**RAW_SINHALAMMLU_ITEM["metadata"], "source": "https://other.example/paper"},
+        "metadata": {**metadata, "source": "https://other.example/paper"},
     }
     second = SinhalaMMLURawItem.model_validate(modified).to_mcq_item()
 
