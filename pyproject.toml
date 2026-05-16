@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.scripts]
-sinhalaeval = "egeyuma.cli:app"
+egeyuma = "egeyuma.cli:app"
 
 [tool.ruff]
 line-length = 100
