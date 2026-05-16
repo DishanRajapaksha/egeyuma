@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { base } from '$app/paths';
+
   type ResultItem = {
     id: string;
     gold: string;
@@ -37,6 +39,7 @@
   const { data }: { data: PageData } = $props();
   const latest = $derived(data.runs[0]);
   const runCount = $derived(data.runs.length);
+  const docsHref = $derived(`${base}/docs/`);
   const sortedByAccuracy = $derived(
     [...data.runs].sort((left, right) => {
       const accuracyDiff = right.accuracy - left.accuracy;
@@ -93,9 +96,12 @@
       <p class="eyebrow">Egeyuma</p>
       <h1>LLM Benchmark Dashboard</h1>
     </div>
-    <div class="source-path">
-      <span>Published results</span>
-      <code>{data.resultsPath}</code>
+    <div class="topbar-actions">
+      <a class="docs-link" href={docsHref}>Read docs</a>
+      <div class="source-path">
+        <span>Published results</span>
+        <code>{data.resultsPath}</code>
+      </div>
     </div>
   </header>
 
