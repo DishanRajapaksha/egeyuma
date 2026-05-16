@@ -191,6 +191,7 @@ def _item_by_id(dataset: list[MCQItem]) -> dict[str, MCQItem]:
 def _result_items_from_log_samples(
     samples: list[Any],
     dataset: list[MCQItem],
+    prompt_name: str,
 ) -> list[dict[str, Any]]:
     by_id = _item_by_id(dataset)
     result_items: list[dict[str, Any]] = []
@@ -206,6 +207,7 @@ def _result_items_from_log_samples(
                 prediction=prediction,
                 raw_response=raw_response,
                 correct=correct,
+                prompt=render_mcq_prompt(item, prompt_name),
             )
         )
 
@@ -262,6 +264,7 @@ def run_inspect_mcq_evaluation(
     result_items = _result_items_from_log_samples(
         cast(list[Any], inspect_log.samples or []),
         dataset,
+        prompt_name,
     )
     provider_mode = "constant-solver" if _is_constant_model(model_name) else "inspect-native"
     payload = build_result_payload(
@@ -270,6 +273,9 @@ def run_inspect_mcq_evaluation(
         model_name=model_name,
         prompt_name=prompt_name,
         result_items=result_items,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        base_url=base_url,
         metadata={
             "inspect_log_dir": str(inspect_log_dir),
             "inspect_model": _inspect_model_name(model_name),
